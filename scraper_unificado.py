@@ -230,14 +230,19 @@ def scrape_cancilleria_ferias():
 
     print(" Cancillería Ferias...")
 
-    # ── TRUCO PARA LA NUBE: Descarga Chromium automáticamente ──
-    import os; os.system("playwright install chromium")
-    
+ # ── TRUCO DE INICIALIZACIÓN SILENCIOSA PARA LA NUBE ──
+    import os
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "0" # Evita conflictos de rutas en Linux
+    os.system("playwright install chromium > /dev/null 2>&1")
+
     with sync_playwright() as p:
+        # Lanzamos usando los binarios instalados de forma segura
         nav = p.chromium.launch(headless=True)
         pag = nav.new_page()
-        pag.goto(URL, timeout=30000)
-        pag.wait_for_timeout(4000)
+        
+        # Le damos 90 segundos (90000ms) porque Cancillería suele saturarse
+        pag.goto(URL, timeout=90000)
+        pag.wait_for_timeout(5000)
 
         # Total páginas dinámico
         soup_init = BeautifulSoup(pag.content(), "html.parser")
