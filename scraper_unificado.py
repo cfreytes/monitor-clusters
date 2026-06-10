@@ -230,20 +230,19 @@ def scrape_cancilleria_ferias():
 
     print(" Cancillería Ferias...")
 
-    # ── TRUCO DE INICIALIZACIÓN SILENCIOSA PARA LA NUBE ──
-    import os
-    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "0" # Evita conflictos de rutas en Linux
-    os.system("playwright install chromium > /dev/null 2>&1")
+    # ── INSTALACIÓN CORRECTA PARA LA NUBE (Sin bloquear la ruta) ──
+    import subprocess
+    subprocess.run(["playwright", "install", "chromium"])
 
     with sync_playwright() as p:
-        # ── FIX CLAVE: Argumentos para evitar el colapso de memoria en Streamlit Cloud ──
+        # ── FIX CLAVE: Argumentos para evitar colapso de memoria ──
         nav = p.chromium.launch(
             headless=True,
             args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
         )
         pag = nav.new_page()
         
-        # Le damos 90 segundos (90000ms) porque Cancillería suele saturarse
+        # Le damos 90 segundos porque Cancillería suele saturarse
         pag.goto(URL, timeout=90000)
         pag.wait_for_timeout(5000)
 
@@ -296,6 +295,7 @@ def scrape_cancilleria_ferias():
                     continue
                 titulos_vistos.add(clave)
 
+                import re as _re
                 match = _re.search(r'/sitios/ficha_feriarepre_poncho/(\d+)', onclick)
                 link = f"https://exportaciones.cancilleria.gob.ar{match.group(0)}" if match else URL
 
@@ -318,7 +318,6 @@ def scrape_cancilleria_ferias():
 
     print(f"   OK {len(resultados)} ferias únicas")
     return resultados
-
 # ─────────────────────────────────────────────
 # UNIFICACIÓN
 # ─────────────────────────────────────────────
