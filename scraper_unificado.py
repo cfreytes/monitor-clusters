@@ -230,6 +230,9 @@ def scrape_cancilleria_ferias():
 
     print(" Cancillería Ferias...")
 
+    # ── TRUCO PARA LA NUBE: Descarga Chromium automáticamente ──
+    import os; os.system("playwright install chromium")
+    
     with sync_playwright() as p:
         nav = p.chromium.launch(headless=True)
         pag = nav.new_page()
