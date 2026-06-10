@@ -230,14 +230,17 @@ def scrape_cancilleria_ferias():
 
     print(" Cancillería Ferias...")
 
- # ── TRUCO DE INICIALIZACIÓN SILENCIOSA PARA LA NUBE ──
+    # ── TRUCO DE INICIALIZACIÓN SILENCIOSA PARA LA NUBE ──
     import os
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "0" # Evita conflictos de rutas en Linux
     os.system("playwright install chromium > /dev/null 2>&1")
 
     with sync_playwright() as p:
-        # Lanzamos usando los binarios instalados de forma segura
-        nav = p.chromium.launch(headless=True)
+        # ── FIX CLAVE: Argumentos para evitar el colapso de memoria en Streamlit Cloud ──
+        nav = p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+        )
         pag = nav.new_page()
         
         # Le damos 90 segundos (90000ms) porque Cancillería suele saturarse
